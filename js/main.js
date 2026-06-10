@@ -1,12 +1,15 @@
 import { Game } from './engine.js';
 import { Renderer } from './render.js';
-import { bindKeys } from './input.js';
+import { bindKeys, bindTouch } from './input.js';
 import { generateAsync, SIZES } from './generator.js';
 import { PRESETS, COLOR_KEYS, applyTheme, cssName } from './themes.js';
 import {
   loadSettings, saveSettings, loadScores, clearScores, scoreKey, recordScore,
 } from './storage.js';
 import { randomSeed } from './rng.js';
+
+// touch-first device: keyboard shortcuts are irrelevant in copy/help
+const IS_TOUCH = matchMedia('(pointer: coarse)').matches;
 
 // ---------- state ----------
 
@@ -321,7 +324,7 @@ function showOverlay(kind, data = {}) {
   } else if (kind === 'paused') {
     card.innerHTML = `
       <p class="card-title">paused</p>
-      <p class="card-sub">press <kbd>p</kbd> to resume</p>`;
+      <p class="card-sub">${IS_TOUCH ? 'tap to resume' : 'press <kbd>p</kbd> to resume'}</p>`;
   } else if (kind === 'error') {
     card.innerHTML = `
       <p class="card-title">couldn't find a puzzle</p>
@@ -525,10 +528,17 @@ function buildHelpPanel() {
   panelHeader('help');
   const body = document.createElement('div');
   body.className = 'panel-body';
-  body.innerHTML = `
-    <p class="panel-sub">push every box onto a goal dot.</p>
-    <div class="key-list">
+  const controls = IS_TOUCH
+    ? `
+      <div><kbd>swipe</kbd><span>move — hold &amp; drag to keep moving</span></div>
+      <div><kbd>↶ ↷</kbd><span>undo / redo</span></div>
+      <div><kbd>⟲</kbd><span>reset puzzle</span></div>
+      <div><kbd>⏸</kbd><span>pause (timer on)</span></div>
+      <div><kbd>◐</kbd><span>theme</span></div>
+      <div><kbd>★</kbd><span>scores</span></div>`
+    : `
       <div><kbd>↑↓←→</kbd> / <kbd>wasd</kbd> / <kbd>hjkl</kbd><span>move</span></div>
+      <div><kbd>swipe</kbd><span>move (touch) — hold &amp; drag to keep moving</span></div>
       <div><kbd>z</kbd> / <kbd>u</kbd><span>undo</span></div>
       <div><kbd>y</kbd> / <kbd>shift z</kbd><span>redo</span></div>
       <div><kbd>r</kbd><span>reset puzzle</span></div>
@@ -536,8 +546,10 @@ function buildHelpPanel() {
       <div><kbd>enter</kbd><span>new puzzle</span></div>
       <div><kbd>t</kbd><span>theme</span></div>
       <div><kbd>g</kbd><span>scores</span></div>
-      <div><kbd>?</kbd><span>this help</span></div>
-    </div>
+      <div><kbd>?</kbd><span>this help</span></div>`;
+  body.innerHTML = `
+    <p class="panel-sub">push every box onto a goal dot.</p>
+    <div class="key-list">${controls}</div>
     <p class="panel-sub">puzzles are generated and verified solvable; the
     move counter shows the optimal solution length found by the solver.
     high scores are kept per difficulty · size · box-count category, by
@@ -593,7 +605,13 @@ function init() {
     if (phase === 'playing' && settings.timer) actions.pause();
   });
 
+  // tap/click anywhere on the paused overlay to resume (no keyboard on touch)
+  overlayEl.addEventListener('click', () => {
+    if (phase === 'paused') actions.pause();
+  });
+
   bindKeys(actions);
+  bindTouch($('boardWrap'), actions);
   // First puzzle is generated from the start dialog, not automatically.
   showOverlay('start');
   syncHud();
