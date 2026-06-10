@@ -3,6 +3,8 @@
 A minimalist Sokoban with procedural puzzle generation, organic theming,
 and Minesweeper-style high scores. No build step, no dependencies.
 
+Built by Claude Fable 5.
+
 ## Run
 
 Any static server works (ES modules need http://, not file://):
