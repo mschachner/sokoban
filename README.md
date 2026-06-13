@@ -1,4 +1,4 @@
-# sokoban.
+# sokoban
 
 A minimalist Sokoban with procedural puzzle generation, organic theming,
 and Minesweeper-style high scores. No build step, no dependencies.
