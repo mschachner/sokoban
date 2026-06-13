@@ -16,12 +16,12 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add - <<< "$DEPLOY_KEY"
           git clone --depth 1 git@github.com:mschachner/site.git site
-          rm -rf site/<name>            # clear stale hashed assets
-          mkdir -p site/<name>
-          cp -R index.html styles.css js/ site/<name>/     # plain static: copy only what the browser needs instead
+          rm -rf site/sokoban           # clear stale hashed assets
+          mkdir -p site/sokoban
+          cp -R index.html styles.css js/ site/sokoban/     # plain static: copy only what the browser needs instead
           cd site
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add <name>
-          git diff --cached --quiet || git commit -m "Deploy <name> from ${GITHUB_SHA::7}"
+          git add skokban
+          git diff --cached --quiet || git commit -m "Deploy sokoban from ${GITHUB_SHA::7}"
           git push
