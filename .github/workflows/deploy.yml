@@ -18,7 +18,8 @@ jobs:
           git clone --depth 1 git@github.com:mschachner/site.git site
           rm -rf site/sokoban           # clear stale hashed assets
           mkdir -p site/sokoban
-          cp -R index.html styles.css js/ site/sokoban/     # plain static: copy only what the browser needs instead
+          cp -R index.html styles.css manifest.webmanifest sw.js js/ icons/ site/sokoban/   # plain static: copy only what the browser needs
+          sed -i "s/__VERSION__/${GITHUB_SHA::7}/" site/sokoban/sw.js   # new commit → new cache name → old shell retired
           cd site
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
